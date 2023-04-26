@@ -30,7 +30,7 @@ RBTNode* getSibling(RBTNode* node);
 RBTNode* getUncle(RBTNode* node);
 
 bool getColor(RBTNode* node);
-void RBTInsert(RBTNode* root, RBTNode* node);
+void RBTInsert(RBTNode* &root, RBTNode* node);
 void RBTInsertFix(RBTNode* node);
 void RBTPrint(RBTNode* root, int indent);
 void rotateLeft(RBTNode* node);
@@ -74,6 +74,7 @@ int main() {
             numbers.open("numbers.txt");
             int newNum;
             while (numbers >> newNum) {
+                cout << "ran" << endl;
                 RBTNode* node = new RBTNode(newNum);
                 RBTInsert(root, node);
                 RBTInsertFix(node);
@@ -133,7 +134,7 @@ bool getColor(RBTNode* node) {
     return node->isRed;
 }
 
-void RBTInsert(RBTNode* root, RBTNode* node) {
+void RBTInsert(RBTNode* &root, RBTNode* node) {
     if (root == NULL) {
         root = node;
         root->isRed = false;
