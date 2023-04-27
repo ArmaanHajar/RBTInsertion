@@ -36,8 +36,10 @@ void RBTPrint(RBTNode* root, int indent);
 void rotateLeft(RBTNode* node);
 void rotateRight(RBTNode* node);
 void replaceNode(RBTNode* oldNode, RBTNode* newNode);
+bool isLeftOrRight(RBTNode* node);
 
 int main() {
+
     char input[10];
     bool running = true;
     RBTNode* root = NULL;
@@ -57,7 +59,7 @@ int main() {
             if (inputNum >= 1 && inputNum <= 999) { // checks if input is valid
                 RBTNode* node = new RBTNode(inputNum);
                 RBTInsert(root, node);
-                // RBTInsertFix(node);
+                RBTInsertFix(node);
             }
             else { // if input is invalid
                 cout << "Invalid Input" << endl;
@@ -77,7 +79,7 @@ int main() {
                 cout << "ran" << endl;
                 RBTNode* node = new RBTNode(newNum);
                 RBTInsert(root, node);
-                // RBTInsertFix(node);
+                RBTInsertFix(node);
             }
             numbers.close();
         }
@@ -224,22 +226,49 @@ void RBTPrint(RBTNode* root, int indent) {
 }
 
 void rotateLeft(RBTNode* node) {
-    RBTNode* right = node->right;
-    replaceNode(node, right);
-    node->right = right->left;
-    if (right->left != NULL) {
-        right->left->parent = node;
+    RBTNode* tempGP = getGrandparent(node);
+    RBTNode* tempP = getParent(node);
+    RBTNode* tempN = node;
+    RBTNode* tempNL = node->left;
+    if (node->left == NULL) { // node has no left
+        if (isLeftOrRight(node->parent) == true) { // parent is left child of grandparent
+            // set nodes parent right to null
+            // set nodes grandparent left to null
+            // set grandparents left to node
+            // set nodes left to parent
+            // set parents parent to nodes left
+            // set nodes parent to grandparents left
+            node->parent->right = NULL;
+            tempN->parent->parent->left = NULL;
+            tempP->parent->left = node;
+            node->left = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->left = node;
+            node->left = tempP;
+        }
+        if (isLeftOrRight(node->parent) == false) { // parent is right child of grandparent
+            // code
+        }
     }
-    right->left = node;
-    node->parent = right;
+    if (node->left != NULL) { // node has a left
+        if (isLeftOrRight(node->parent) == true) { // parent is left child of grandparent
+            // code
+        }
+        if (isLeftOrRight(node->parent) == false) { // parent is right child of grandparent
+            // code
+        }
+    }
 }
 
 void rotateRight(RBTNode* node) {
     RBTNode* left = node->left;
     replaceNode(node, left);
-    node->left = left->right;
-    if (left->right != NULL) {
-        left->right->parent = node;
+    if (node->left != NULL) {
+        node->left = left->right;
+        if (left->right != NULL) {
+            left->right->parent = node;
+        }
     }
     left->right = node;
     node->parent = left;
@@ -258,3 +287,17 @@ void replaceNode(RBTNode* oldNode, RBTNode* newNode) {
         }
     }
 }
+
+ bool isLeftOrRight(RBTNode* node) { // checks if node is left or right child
+    // returns true if left child
+    // returns false is right child
+    if (node->parent == NULL) { // if node is root
+        return false;
+    }
+    else if (node->parent->left == node) { // if node is left child
+        return true;
+    }
+    else { // if node is right child
+        return false;
+    }
+ }
