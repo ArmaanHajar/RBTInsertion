@@ -57,7 +57,7 @@ int main() {
             if (inputNum >= 1 && inputNum <= 999) { // checks if input is valid
                 RBTNode* node = new RBTNode(inputNum);
                 RBTInsert(root, node);
-                RBTInsertFix(node);
+                // RBTInsertFix(node);
             }
             else { // if input is invalid
                 cout << "Invalid Input" << endl;
@@ -77,7 +77,7 @@ int main() {
                 cout << "ran" << endl;
                 RBTNode* node = new RBTNode(newNum);
                 RBTInsert(root, node);
-                RBTInsertFix(node);
+                // RBTInsertFix(node);
             }
             numbers.close();
         }
@@ -135,26 +135,26 @@ bool getColor(RBTNode* node) {
 }
 
 void RBTInsert(RBTNode* &root, RBTNode* node) {
-    if (root == NULL) {
+    if (root == NULL) { // if tree is empty
         root = node;
         root->isRed = false;
     }
-    else {
-        if (node->data < root->data) {
-            if (root->left == NULL) {
+    else { // if tree is not empty
+        if (node->data < root->data) { // if node is less than root
+            if (root->left == NULL) { // if left child is null
                 root->left = node;
                 node->parent = root;
             }
-            else {
+            else { // if left child is not null
                 RBTInsert(root->left, node);
             }
         }
-        else {
-            if (root->right == NULL) {
+        else { // if node is greater than root
+            if (root->right == NULL) { // if right child is null
                 root->right = node;
                 node->parent = root;
             }
-            else {
+            else { // if right child is not null
                 RBTInsert(root->right, node);
             }
         }
@@ -162,27 +162,27 @@ void RBTInsert(RBTNode* &root, RBTNode* node) {
 }
 
 void RBTInsertFix(RBTNode* node) {
-    if (getParent(node) == NULL) {
+    if (getParent(node) == NULL) { // if node is root
         node->isRed = false;
     }
-    else if (getColor(getParent(node)) == false) {
+    else if (getColor(getParent(node)) == false) { // if parent is black
         return;
     }
-    else if (getColor(getUncle(node)) == true) {
+    else if (getColor(getUncle(node)) == true) { // if uncle is red
         getParent(node)->isRed = false;
         getUncle(node)->isRed = false;
         getGrandparent(node)->isRed = true;
         RBTInsertFix(getGrandparent(node));
     }
-    else {
+    else { // if uncle is black
         RBTNode* parent = getParent(node);
         RBTNode* grandparent = getGrandparent(node);
 
-        if (node == parent->right && parent == grandparent->left) {
+        if (node == parent->right && parent == grandparent->left) { // if node is right child and parent is left child
             rotateLeft(parent);
             node = node->left;
         }
-        else if (node == parent->left && parent == grandparent->right) {
+        else if (node == parent->left && parent == grandparent->right) { // if node is left child and parent is right child
             rotateRight(parent);
             node = node->right;
         }
@@ -190,10 +190,10 @@ void RBTInsertFix(RBTNode* node) {
         parent = getParent(node);
         grandparent = getGrandparent(node);
 
-        if (node == parent->left) {
+        if (node == parent->left) { // if node is left child
             rotateRight(grandparent);
         }
-        else {
+        else { // if node is right child
             rotateLeft(grandparent);
         }
         parent->isRed = false;
@@ -212,7 +212,14 @@ void RBTPrint(RBTNode* root, int indent) {
     for (int i = 10; i < indent; i++) { // prints the indent
         cout << " ";
     }
-    cout << root->data << endl;
+    cout << root->data;
+    if (root->isRed == true) { // prints the color of the node
+        cout << " (R)" << endl;
+    }
+    else {
+        cout << " (B)" << endl;
+    }
+    cout << endl;
     RBTPrint(root->left, indent); // prints the left side of the tree
 }
 
