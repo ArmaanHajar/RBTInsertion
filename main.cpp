@@ -277,8 +277,7 @@ void rotateLeft(RBTNode* node) {
         if (leftOrRight == 2) { // parent is right child of grandparent
             cout << "rotate left, has left child, parent is right child of grandparent" << endl;
             node->parent->right = NULL;
-            tempN->parent->parent->right = NULL;
-            cout << "yippee" << endl;
+            tempN->parent->parent->right = NULL; // crashed here
             tempP->parent->right = node;
             node->left = tempP;
             node->parent = tempGP;
