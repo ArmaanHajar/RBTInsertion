@@ -36,10 +36,9 @@ void RBTPrint(RBTNode* root, int indent);
 void rotateLeft(RBTNode* node);
 void rotateRight(RBTNode* node);
 void replaceNode(RBTNode* oldNode, RBTNode* newNode);
-bool isLeftOrRight(RBTNode* node);
+int isLeftOrRight(RBTNode* node);
 
 int main() {
-
     char input[10];
     bool running = true;
     RBTNode* root = NULL;
@@ -225,19 +224,16 @@ void RBTPrint(RBTNode* root, int indent) {
     RBTPrint(root->left, indent); // prints the left side of the tree
 }
 
+// add cases for node is root
 void rotateLeft(RBTNode* node) {
     RBTNode* tempGP = getGrandparent(node);
     RBTNode* tempP = getParent(node);
     RBTNode* tempN = node;
     RBTNode* tempNL = node->left;
+    int leftOrRight = isLeftOrRight(node->parent);
     if (node->left == NULL) { // node has no left
-        if (isLeftOrRight(node->parent) == true) { // parent is left child of grandparent
-            // set nodes parent right to null
-            // set nodes grandparent left to null
-            // set grandparents left to node
-            // set nodes left to parent
-            // set parents parent to nodes left
-            // set nodes parent to grandparents left
+        if (leftOrRight == 1) { // parent is left child of grandparent
+            cout << "rotate left, no left child, parent is left child of grandparent" << endl;
             node->parent->right = NULL;
             tempN->parent->parent->left = NULL;
             tempP->parent->left = node;
@@ -246,32 +242,121 @@ void rotateLeft(RBTNode* node) {
             tempP->parent = node;
             node->parent->left = node;
             node->left = tempP;
+            node->left->right = NULL;
+            cout << "ran" << endl;
         }
-        if (isLeftOrRight(node->parent) == false) { // parent is right child of grandparent
-            // code
+        if (leftOrRight == 2) { // parent is right child of grandparent
+            cout << "rotate left, no left child, parent is right child of grandparent" << endl;
+            node->parent->right = NULL;
+            tempN->parent->parent->right = NULL;
+            tempP->parent->right = node;
+            node->left = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->right = node;
+            node->left = tempP;
+            node->left->right = NULL;
+            cout << "ran" << endl;
         }
     }
     if (node->left != NULL) { // node has a left
-        if (isLeftOrRight(node->parent) == true) { // parent is left child of grandparent
-            // code
+        if (leftOrRight == 1) { // parent is left child of grandparent
+            cout << "rotate left, has left child, parent is left child of grandparent" << endl;
+            node->parent->right = NULL;
+            tempN->parent->parent->left = NULL;
+            tempP->parent->left = node; 
+            node->left = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->left = node;
+            node->left = tempP;
+            node->left->right = tempNL;
+            tempNL->parent->right = tempNL;
+            cout << "ran" << endl;
         }
-        if (isLeftOrRight(node->parent) == false) { // parent is right child of grandparent
-            // code
+        if (leftOrRight == 2) { // parent is right child of grandparent
+            cout << "rotate left, has left child, parent is right child of grandparent" << endl;
+            node->parent->right = NULL;
+            tempN->parent->parent->right = NULL;
+            cout << "yippee" << endl;
+            tempP->parent->right = node;
+            node->left = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->right = node;
+            node->left = tempP;
+            node->left->right = tempNL;
+            tempNL->parent->right = tempNL;
+            cout << "ran" << endl;
         }
     }
 }
 
+// add cases for node is root
 void rotateRight(RBTNode* node) {
-    RBTNode* left = node->left;
-    replaceNode(node, left);
-    if (node->left != NULL) {
-        node->left = left->right;
-        if (left->right != NULL) {
-            left->right->parent = node;
+    RBTNode* tempGP = getGrandparent(node);
+    RBTNode* tempP = getParent(node);
+    RBTNode* tempN = node;
+    RBTNode* tempNR = node->right;
+    int leftOrRight = isLeftOrRight(node->parent);
+    if (node->right == NULL) { // node has no right
+        if (leftOrRight == 1) { // parent is left child of grandparent
+            cout << "rotate right, no right child, parent is left child of grandparent" << endl;
+            node->parent->left = NULL;
+            tempN->parent->parent->left = NULL;
+            tempP->parent->left = node;
+            node->right = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->left = node;
+            node->right = tempP;
+            node->right->left = NULL;
+            cout << "ran" << endl;
+        }
+        if (leftOrRight == 2) { // parent is right child of grandparent
+            cout << "rotate right, no right child, parent is right child of grandparent" << endl;
+            node->parent->left = NULL;
+            tempN->parent->parent->right = NULL;
+            tempP->parent->right = node;
+            node->right = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->right = node;
+            node->right = tempP;
+            node->right->left = NULL;
+            cout << "ran" << endl;
         }
     }
-    left->right = node;
-    node->parent = left;
+    if (node->right != NULL) { // node has a right
+        if (leftOrRight == 1) { // parent is left child of grandparent
+            cout << "rotate right, has right child, parent is left child of grandparent" << endl;
+            node->parent->left = NULL;
+            tempN->parent->parent->left = NULL;
+            tempP->parent->left = node;
+            node->right = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->left = node;
+            node->right = tempP;
+            node->right->left = tempNR;
+            tempNR->parent->left = tempNR;
+            cout << "ran" << endl;
+        }
+        if (leftOrRight == 2) { // parent is right child of grandparent
+            cout << "rotate right, has right child, parent is right child of grandparent" << endl;
+            node->parent->left = NULL;
+            tempN->parent->parent->right = NULL;
+            tempP->parent->right = node;
+            node->right = tempP;
+            node->parent = tempGP;
+            tempP->parent = node;
+            node->parent->right = node;
+            node->right = tempP;
+            node->right->left = tempNR;
+            tempNR->parent->left = tempNR;
+            cout << "ran" << endl;
+        }
+    }
 }
 
 void replaceNode(RBTNode* oldNode, RBTNode* newNode) {
@@ -288,16 +373,17 @@ void replaceNode(RBTNode* oldNode, RBTNode* newNode) {
     }
 }
 
- bool isLeftOrRight(RBTNode* node) { // checks if node is left or right child
-    // returns true if left child
-    // returns false is right child
+ int isLeftOrRight(RBTNode* node) { // checks if node is left or right child
+    // returns 0 if parent is root
+    // returns 1 if left child
+    // returns 2 is right child
     if (node->parent == NULL) { // if node is root
-        return false;
+        return 0;
     }
     else if (node->parent->left == node) { // if node is left child
-        return true;
+        return 1;
     }
     else { // if node is right child
-        return false;
+        return 2;
     }
  }
