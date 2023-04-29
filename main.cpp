@@ -1,7 +1,8 @@
 /*
  * Author: Armaan Hajar
  * Description: Red Black Tree Insertion Code
- * Date: 
+ * Date: 4/28/2023
+ * Thank you to Uno Pasadhika for help with the rotateLeft and rotateRight functions
  */
 
 #include <iostream>
@@ -31,12 +32,10 @@ RBTNode* getUncle(RBTNode* node);
 
 bool getColor(RBTNode* node);
 void RBTInsert(RBTNode* &root, RBTNode* node);
-void RBTInsertFix(RBTNode* node);
+void RBTInsertFix(RBTNode* node, RBTNode* root);
 void RBTPrint(RBTNode* root, int indent);
-void rotateLeft(RBTNode* node);
-void rotateRight(RBTNode* node);
-void replaceNode(RBTNode* oldNode, RBTNode* newNode);
-int isLeftOrRight(RBTNode* node);
+void rotateLeft(RBTNode* node, RBTNode* root);
+void rotateRight(RBTNode* node, RBTNode* root);
 
 int main() {
     char input[10];
@@ -58,7 +57,7 @@ int main() {
             if (inputNum >= 1 && inputNum <= 999) { // checks if input is valid
                 RBTNode* node = new RBTNode(inputNum);
                 RBTInsert(root, node);
-                RBTInsertFix(node);
+                RBTInsertFix(node, root);
             }
             else { // if input is invalid
                 cout << "Invalid Input" << endl;
@@ -74,11 +73,10 @@ int main() {
             ifstream numbers;
             numbers.open("numbers.txt");
             int newNum;
-            while (numbers >> newNum) {
-                cout << "ran" << endl;
+            while (numbers >> newNum) { // loops until end of file
                 RBTNode* node = new RBTNode(newNum);
                 RBTInsert(root, node);
-                RBTInsertFix(node);
+                RBTInsertFix(node, root);
             }
             numbers.close();
         }
@@ -95,47 +93,47 @@ int main() {
 }
 
 
-RBTNode* getParent(RBTNode* node) {
+RBTNode* getParent(RBTNode* node) { // returns the parent of the node
     return node->parent;
 }
 
-RBTNode* getGrandparent(RBTNode* node) {
+RBTNode* getGrandparent(RBTNode* node) { // returns the grandparent of the node
     return getParent(getParent(node));
 }
 
-RBTNode* getSibling(RBTNode* node) {
+RBTNode* getSibling(RBTNode* node) { // returns the sibling of the node
     RBTNode* parent = getParent(node);
-    if (parent == NULL) {
+    if (parent == NULL) { // if node is root
         return NULL;
     }
 
-    if (node == parent->left) {
+    if (node == parent->left) { // if node is left child
         return parent->right;
     }
-    else {
+    else { // if node is right child
         return parent->left;
     }
 }
 
-RBTNode* getUncle(RBTNode* node) {
+RBTNode* getUncle(RBTNode* node) { // returns the uncle of the node
     RBTNode* parent = getParent(node);
     RBTNode* grandparent = getGrandparent(node);
 
-    if (grandparent == NULL) {
+    if (grandparent == NULL) { // if node is root
         return NULL;
     }
 
     return getSibling(parent);
 }
 
-bool getColor(RBTNode* node) {
+bool getColor(RBTNode* node) { // returns the color of the node
     if (node == NULL) {
         return false;
     }
     return node->isRed;
 }
 
-void RBTInsert(RBTNode* &root, RBTNode* node) {
+void RBTInsert(RBTNode* &root, RBTNode* node) { // inserts a node into the tree
     if (root == NULL) { // if tree is empty
         root = node;
         root->isRed = false;
@@ -162,7 +160,7 @@ void RBTInsert(RBTNode* &root, RBTNode* node) {
     }
 }
 
-void RBTInsertFix(RBTNode* node) {
+void RBTInsertFix(RBTNode* node, RBTNode* root) { // fixes the tree after insertion
     if (getParent(node) == NULL) { // if node is root
         node->isRed = false;
     }
@@ -173,18 +171,18 @@ void RBTInsertFix(RBTNode* node) {
         getParent(node)->isRed = false;
         getUncle(node)->isRed = false;
         getGrandparent(node)->isRed = true;
-        RBTInsertFix(getGrandparent(node));
+        RBTInsertFix(getGrandparent(node), root);
     }
     else { // if uncle is black
         RBTNode* parent = getParent(node);
         RBTNode* grandparent = getGrandparent(node);
 
         if (node == parent->right && parent == grandparent->left) { // if node is right child and parent is left child
-            rotateLeft(parent);
+            rotateLeft(parent, root);
             node = node->left;
         }
         else if (node == parent->left && parent == grandparent->right) { // if node is left child and parent is right child
-            rotateRight(parent);
+            rotateRight(parent, root);
             node = node->right;
         }
 
@@ -192,17 +190,17 @@ void RBTInsertFix(RBTNode* node) {
         grandparent = getGrandparent(node);
 
         if (node == parent->left) { // if node is left child
-            rotateRight(grandparent);
+            rotateRight(grandparent, root);
         }
         else { // if node is right child
-            rotateLeft(grandparent);
+            rotateLeft(grandparent, root);
         }
         parent->isRed = false;
         grandparent->isRed = true;
     }
 }
 
-void RBTPrint(RBTNode* root, int indent) {
+void RBTPrint(RBTNode* root, int indent) { // prints the tree
     if (root == NULL) { // if the tree is empty
         return;
     }
@@ -217,172 +215,49 @@ void RBTPrint(RBTNode* root, int indent) {
     if (root->isRed == true) { // prints the color of the node
         cout << " (R)" << endl;
     }
-    else {
+    else { // prints the color of the node
         cout << " (B)" << endl;
     }
     cout << endl;
     RBTPrint(root->left, indent); // prints the left side of the tree
 }
 
-// add cases for node is root
-void rotateLeft(RBTNode* node) {
-    RBTNode* tempGP = getGrandparent(node);
-    RBTNode* tempP = getParent(node);
-    RBTNode* tempN = node;
-    RBTNode* tempNL = node->left;
-    int leftOrRight = isLeftOrRight(node->parent);
-    if (node->left == NULL) { // node has no left
-        if (leftOrRight == 1) { // parent is left child of grandparent
-            cout << "rotate left, no left child, parent is left child of grandparent" << endl;
-            node->parent->right = NULL;
-            tempN->parent->parent->left = NULL;
-            tempP->parent->left = node;
-            node->left = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->left = node;
-            node->left = tempP;
-            node->left->right = NULL;
-            cout << "ran" << endl;
-        }
-        if (leftOrRight == 2) { // parent is right child of grandparent
-            cout << "rotate left, no left child, parent is right child of grandparent" << endl;
-            node->parent->right = NULL;
-            tempN->parent->parent->right = NULL;
-            tempP->parent->right = node;
-            node->left = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->right = node;
-            node->left = tempP;
-            node->left->right = NULL;
-            cout << "ran" << endl;
-        }
+void rotateLeft(RBTNode* node, RBTNode* root) { // rotates the tree left
+    RBTNode* nodeRight = node->right;
+    node->right = nodeRight->left;
+    if (nodeRight->left != NULL) { // if left child of right child of node is not null
+        nodeRight->left->parent = node;
     }
-    if (node->left != NULL) { // node has a left
-        if (leftOrRight == 1) { // parent is left child of grandparent
-            cout << "rotate left, has left child, parent is left child of grandparent" << endl;
-            node->parent->right = NULL;
-            tempN->parent->parent->left = NULL;
-            tempP->parent->left = node; 
-            node->left = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->left = node;
-            node->left = tempP;
-            node->left->right = tempNL;
-            tempNL->parent->right = tempNL;
-            cout << "ran" << endl;
-        }
-        if (leftOrRight == 2) { // parent is right child of grandparent
-            cout << "rotate left, has left child, parent is right child of grandparent" << endl;
-            node->parent->right = NULL;
-            tempN->parent->parent->right = NULL; // crashed here
-            tempP->parent->right = node;
-            node->left = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->right = node;
-            node->left = tempP;
-            node->left->right = tempNL;
-            tempNL->parent->right = tempNL;
-            cout << "ran" << endl;
-        }
-    }
-}
-
-// add cases for node is root
-void rotateRight(RBTNode* node) {
-    RBTNode* tempGP = getGrandparent(node);
-    RBTNode* tempP = getParent(node);
-    RBTNode* tempN = node;
-    RBTNode* tempNR = node->right;
-    int leftOrRight = isLeftOrRight(node->parent);
-    if (node->right == NULL) { // node has no right
-        if (leftOrRight == 1) { // parent is left child of grandparent
-            cout << "rotate right, no right child, parent is left child of grandparent" << endl;
-            node->parent->left = NULL;
-            tempN->parent->parent->left = NULL;
-            tempP->parent->left = node;
-            node->right = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->left = node;
-            node->right = tempP;
-            node->right->left = NULL;
-            cout << "ran" << endl;
-        }
-        if (leftOrRight == 2) { // parent is right child of grandparent
-            cout << "rotate right, no right child, parent is right child of grandparent" << endl;
-            node->parent->left = NULL;
-            tempN->parent->parent->right = NULL;
-            tempP->parent->right = node;
-            node->right = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->right = node;
-            node->right = tempP;
-            node->right->left = NULL;
-            cout << "ran" << endl;
-        }
-    }
-    if (node->right != NULL) { // node has a right
-        if (leftOrRight == 1) { // parent is left child of grandparent
-            cout << "rotate right, has right child, parent is left child of grandparent" << endl;
-            node->parent->left = NULL;
-            tempN->parent->parent->left = NULL;
-            tempP->parent->left = node;
-            node->right = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->left = node;
-            node->right = tempP;
-            node->right->left = tempNR;
-            tempNR->parent->left = tempNR;
-            cout << "ran" << endl;
-        }
-        if (leftOrRight == 2) { // parent is right child of grandparent
-            cout << "rotate right, has right child, parent is right child of grandparent" << endl;
-            node->parent->left = NULL;
-            tempN->parent->parent->right = NULL;
-            tempP->parent->right = node;
-            node->right = tempP;
-            node->parent = tempGP;
-            tempP->parent = node;
-            node->parent->right = node;
-            node->right = tempP;
-            node->right->left = tempNR;
-            tempNR->parent->left = tempNR;
-            cout << "ran" << endl;
-        }
-    }
-}
-
-void replaceNode(RBTNode* oldNode, RBTNode* newNode) {
-    if (oldNode->parent == NULL) {
-        newNode->parent = NULL;
-    }
-    else {
-        if (oldNode == oldNode->parent->left) {
-            oldNode->parent->left = newNode;
-        }
-        else {
-            oldNode->parent->right = newNode;
-        }
-    }
-}
-
- int isLeftOrRight(RBTNode* node) { // checks if node is left or right child
-    // returns 0 if parent is root
-    // returns 1 if left child
-    // returns 2 is right child
+    nodeRight->left = node;
+    nodeRight->parent = node->parent;
     if (node->parent == NULL) { // if node is root
-        return 0;
+        root = nodeRight;
     }
-    else if (node->parent->left == node) { // if node is left child
-        return 1;
+    else if (node == node->parent->left) { // if node is left child
+        node->parent->left = nodeRight;
     }
     else { // if node is right child
-        return 2;
+        node->parent->right = nodeRight;
+    } 
+    node->parent = nodeRight;
+}
+
+void rotateRight(RBTNode* node, RBTNode* root) { // rotates the tree right
+    RBTNode* nodeLeft = node->left;
+    node->left = nodeLeft->right;
+    if (nodeLeft->right != NULL) { // if right child of left child of node is not null
+        nodeLeft->right->parent = node;
     }
- }
+    nodeLeft->right = node;
+    nodeLeft->parent = node->parent;
+    if (node->parent == NULL) { // if node is root
+        root = nodeLeft;
+    }
+    else if (node == node->parent->left) { // if node is left child
+        node->parent->left = nodeLeft;
+    }
+    else { // if node is right child
+        node->parent->right = nodeLeft;
+    }
+    node->parent = nodeLeft;
+}
